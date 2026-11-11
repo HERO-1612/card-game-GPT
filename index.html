@@ -166,6 +166,7 @@ footer{text-align:center;color:var(--muted);font-size:10px;margin-top:18px}
     state.turn=0;state.score=0;state.streak=0;state.bestStreak=0;
     state.successes=0;state.selected=null;state.exchangeUsed=false;
     state.history=[];state.started=true;state.finished=false;
+    $("historyList").innerHTML='<div class="history-empty">まだ履歴はありません。</div>';
     $("startPanel").hidden=true;$("resultPanel").hidden=true;
     $("gamePanel").hidden=false;$("handPanel").hidden=false;$("historyPanel").hidden=false;
     render();setStatus("手札からカードを1枚選んでください。");

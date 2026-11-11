@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f5f5f2">
-<title>13ターン・カードチャレンジ</title>
+<title>カードゲーム(chatGPT)</title>
 <style>
 :root{--bg:#f5f5f2;--panel:#fff;--ink:#252823;--muted:#777d75;--line:#dedfd8;--accent:#315f8b;--accent-soft:#eaf1f7;--gold:#c69b45;--green:#287a55;--red:#b34e4e;--shadow:0 3px 14px rgba(35,42,35,.06)}
 *{box-sizing:border-box}
@@ -71,7 +71,7 @@ footer{text-align:center;color:var(--muted);font-size:10px;margin-top:18px}
 </head>
 <body>
 <main>
-<header><h1>13ターン・カードチャレンジ</h1><p>YOUR CARD GAME</p></header>
+<header><h1>カードゲーム(chatGPT)</h1></header>
 
 <section class="panel stats" aria-label="ゲーム状況">
   <div class="stat"><small>ターン</small><strong id="turnStat">— / 13</strong></div>
@@ -173,10 +173,10 @@ footer{text-align:center;color:var(--muted);font-size:10px;margin-top:18px}
   const setStatus=(msg,type="")=>{$("status").textContent=msg;$("status").className="status"+(type?" "+type:"");};
   const addHistory=(html)=>{const list=$("historyList");if(list.querySelector(".history-empty"))list.innerHTML="";list.insertAdjacentHTML("afterbegin",html);};
   const render=()=>{
-    $("turnStat").textContent=(state.finished?13:state.turn+1)+" / 13";
+    $("turnStat").textContent=Math.min(13,state.turn+1)+" / 13";
     $("scoreStat").textContent=state.score;
     $("streakStat").textContent=state.streak;
-    $("targetRank").textContent=rank(state.mountain[state.turn]);
+    $("targetRank").textContent=state.turn<13?rank(state.mountain[state.turn]):"—";
     $("nextRank").textContent=state.turn<12?rank(state.mountain[state.turn+1]):"—";
     $("handCount").textContent=`(${state.hand.length}枚)`;
     $("selfRemaining").textContent=`自札の残り：${state.self.length}枚`;

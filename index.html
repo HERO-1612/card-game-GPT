@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f2">
+<title>13ターン・カードチャレンジ</title>
+<style>
+:root{--bg:#f5f5f2;--panel:#fff;--ink:#252823;--muted:#777d75;--line:#dedfd8;--accent:#315f8b;--accent-soft:#eaf1f7;--gold:#c69b45;--green:#287a55;--red:#b34e4e;--shadow:0 3px 14px rgba(35,42,35,.06)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;line-height:1.55}
+main{width:min(100% - 24px,620px);margin:0 auto;padding:22px 0 40px}
+header{text-align:center;margin:4px 0 20px}
+header h1{font-size:clamp(22px,5vw,29px);letter-spacing:.08em;margin:0;font-weight:800}
+header p{font-size:11px;letter-spacing:.18em;color:var(--muted);margin:3px 0 0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:16px;margin:12px 0;box-shadow:var(--shadow)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:#f1f2ee;border-radius:12px;text-align:center;padding:10px 5px}
+.stat small{display:block;color:var(--muted);font-size:11px}
+.stat strong{display:block;font-size:24px;font-variant-numeric:tabular-nums}
+.section-title{font-weight:750;text-align:center;margin:0 0 12px;font-size:15px}
+.cards-row{display:flex;justify-content:center;gap:14px;align-items:center}
+.playing-card{width:112px;min-height:142px;border:2px solid var(--gold);border-radius:13px;background:#fffdf8;display:flex;flex-direction:column;justify-content:center;align-items:center;box-shadow:0 3px 8px #0000000b}
+.playing-card .rank{font-size:49px;font-weight:800;line-height:1.1}
+.playing-card small{font-size:11px;color:var(--muted);margin-top:7px}
+.next-card{width:88px;min-height:116px;border:1px solid var(--line);border-radius:12px;background:#f8f8f5;display:flex;flex-direction:column;justify-content:center;align-items:center}
+.next-card .rank{font-size:34px;font-weight:750}
+.hint{text-align:center;color:var(--muted);font-size:12px;margin:10px 0 0}
+.hand{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.hand-card{min-height:116px;border:1px solid #cfd2cc;border-radius:13px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);transition:.12s}
+.hand-card .rank{font-size:38px;font-weight:800;line-height:1.15}
+.hand-card small{font-size:11px;color:var(--muted);margin-top:5px}
+.hand-card.selected{border:3px solid var(--accent);background:var(--accent-soft);padding:0}
+.hand-card:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #83a9ca;outline-offset:2px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:13px}
+button{font:inherit;cursor:pointer;border-radius:11px;padding:12px 10px;border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:700}
+button.primary{background:var(--accent);border-color:var(--accent);color:white}
+button:disabled{opacity:.42;cursor:not-allowed}
+button.subtle{background:#f7f7f4}
+.status{border-radius:11px;background:#f1f2ee;padding:11px 13px;font-size:13px;margin-top:12px}
+.status.success{background:#edf6f0;color:#246b49}.status.failure{background:#fbefef;color:#9a3f3f}
+.meta{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px;margin-top:9px}
+details{background:#fff;border:1px solid var(--line);border-radius:15px;margin:12px 0;box-shadow:var(--shadow);overflow:hidden}
+summary{cursor:pointer;list-style:none;padding:15px 16px;font-weight:750;display:flex;justify-content:space-between;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary:after{content:"＋";color:var(--muted);font-size:19px}
+details[open] summary:after{content:"−"}
+.rules{padding:0 16px 16px;font-size:13px}
+.rules h3{font-size:14px;margin:15px 0 5px}
+.rules p{margin:5px 0;color:#4e544d}
+.rules table{border-collapse:collapse;width:100%;margin:8px 0}
+.rules th,.rules td{border-bottom:1px solid var(--line);padding:7px;text-align:center}
+.rules th{background:#f5f6f2;font-weight:700}
+.history-list{display:flex;flex-direction:column;gap:7px}
+.history-item{display:grid;grid-template-columns:54px 1fr auto;gap:8px;align-items:center;border-bottom:1px solid #ecece7;padding:8px 0;font-size:12px}
+.history-item:last-child{border-bottom:0}
+.pill{display:inline-block;border-radius:20px;padding:3px 8px;font-size:10px;font-weight:750}
+.pill.ok{background:#e9f4ed;color:var(--green)}.pill.ng{background:#faeeee;color:var(--red)}.pill.exchange{background:#f1f0e9;color:#76642f}
+.history-empty{color:var(--muted);font-size:12px;text-align:center;padding:12px}
+.result{text-align:center;padding:8px 0}
+.result .score{font-size:48px;font-weight:850;color:var(--green);line-height:1.2}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}
+.result-box{background:#f1f2ee;border-radius:12px;padding:12px}
+.result-box small{display:block;color:var(--muted);font-size:11px}
+.result-box strong{font-size:23px}
+.progress{height:7px;background:#e9eae5;border-radius:20px;overflow:hidden;margin-top:5px}
+.progress span{display:block;height:100%;background:var(--green);border-radius:20px}
+footer{text-align:center;color:var(--muted);font-size:10px;margin-top:18px}
+@media(max-width:380px){main{width:min(100% - 16px,620px)}.panel{padding:13px}.playing-card{width:100px;min-height:130px}.hand-card{min-height:105px}.actions{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<header><h1>13ターン・カードチャレンジ</h1><p>YOUR CARD GAME</p></header>
+
+<section class="panel stats" aria-label="ゲーム状況">
+  <div class="stat"><small>ターン</small><strong id="turnStat">— / 13</strong></div>
+  <div class="stat"><small>現在の得点</small><strong id="scoreStat">0</strong></div>
+  <div class="stat"><small>連続成功</small><strong id="streakStat">0</strong></div>
+</section>
+
+<section class="panel" id="startPanel">
+  <p class="section-title">ゲームを始める</p>
+  <p class="hint">自札・山札をそれぞれシャッフルして、手札3枚からスタートします。</p>
+  <button class="primary" id="startBtn" style="width:100%;margin-top:13px">ゲーム開始</button>
+</section>
+
+<section class="panel" id="gamePanel" hidden>
+  <p class="section-title">今回の山札</p>
+  <div class="cards-row">
+    <div class="playing-card"><span class="rank" id="targetRank">—</span><small>公開中</small></div>
+    <div class="next-card"><span class="rank" id="nextRank">—</span><small>次のカード</small></div>
+  </div>
+  <p class="hint">山札の数字以上のカードを出すと成功</p>
+</section>
+
+<section class="panel" id="handPanel" hidden>
+  <p class="section-title">あなたの手札 <span id="handCount"></span></p>
+  <div class="hand" id="handCards"></div>
+  <div class="actions">
+    <button class="primary" id="playBtn" disabled>選択したカードを出す</button>
+    <button class="subtle" id="exchangeBtn" disabled>選択したカードを交換</button>
+  </div>
+  <div class="status" id="status" aria-live="polite">手札からカードを1枚選んでください。</div>
+  <div class="meta"><span id="selfRemaining">自札の残り：—枚</span><span id="exchangeState">交換：未使用</span></div>
+</section>
+
+<section class="panel" id="resultPanel" hidden>
+  <div class="result">
+    <p class="section-title">ゲーム終了！</p>
+    <div class="score" id="finalScore">0点</div>
+  </div>
+  <div class="result-grid">
+    <div class="result-box"><small>成功回数</small><strong id="successCount">0 / 13</strong></div>
+    <div class="result-box"><small>最高連続成功</small><strong id="bestStreak">0回</strong></div>
+  </div>
+  <button class="primary" id="againBtn" style="width:100%">もう一度遊ぶ</button>
+</section>
+
+<section class="panel" id="historyPanel" hidden>
+  <p class="section-title">操作履歴</p>
+  <div class="history-list" id="historyList"><div class="history-empty">まだ履歴はありません。</div></div>
+</section>
+
+<details id="rulesDetails">
+  <summary>ゲームの説明・ルール</summary>
+  <div class="rules">
+    <h3>① 基本ルール</h3>
+    <p>自札と山札は、それぞれA～Kの13枚を独立してシャッフルします。最初に自札から3枚引き、全13ターンをプレイします。</p>
+    <p>毎ターン山札を1枚公開し、手札から1枚選んで出します。出したカードは使用済みになり、ターン終了時に自札が残っていれば1枚補充します。</p>
+    <p>カードの強さは A=1、2～10は数字どおり、J=11、Q=12、K=13 です。</p>
+    <h3>② 連続成功ボーナス</h3>
+    <p>出したカードが山札の数字以上なら成功です。成功するたびに連続成功回数が1増え、獲得点も1点ずつ増加します。</p>
+    <table><thead><tr><th>連続成功回数</th><th>今回の獲得点</th></tr></thead><tbody>
+      <tr><td>1回目</td><td>2点</td></tr><tr><td>2回目</td><td>3点</td></tr><tr><td>3回目</td><td>4点</td></tr><tr><td>4回目</td><td>5点</td></tr><tr><td>5回目</td><td>6点</td></tr><tr><td>6回目</td><td>7点</td></tr>
+    </tbody></table>
+    <p>7回目以降も、成功するたびに獲得点が1点ずつ増えます。失敗した場合は0点で、連続成功回数は0に戻ります。リセット後の次の成功は2点から再開します。</p>
+    <h3>③ 自札先読みルール</h3>
+    <p>現在の山札カードと、次の山札カードを同時に公開します。次のターンには先読みしたカードを使用します。最後のターンでは次のカードはありません。</p>
+    <h3>④ 1回限定・手札交換</h3>
+    <p>ゲーム中に1回だけ、手札から選んだ1枚を自札の残りに戻してシャッフルし、自札から1枚引き直せます。交換ではターン数も得点も変わりませんが、連続成功回数は0に戻ります。</p>
+    <h3>⑤ 操作履歴</h3>
+    <p>各ターンの山札・プレイしたカード・成功／失敗・獲得点・累計得点を記録します。手札交換を行った場合も履歴に記録し、ゲーム終了後も確認できます。</p>
+  </div>
+</details>
+<footer>スマートフォン・PC対応 / 1ファイルで動作</footer>
+</main>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const state = {
+    self:[], mountain:[], hand:[], turn:0, score:0, streak:0,
+    bestStreak:0, successes:0, selected:null, exchangeUsed:false,
+    history:[], started:false, finished:false
+  };
+  const shuffle = arr => {
+    const a=[...arr];
+    for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+    return a;
+  };
+  const rank = n => ({1:"A",11:"J",12:"Q",13:"K"}[n] || String(n));
+  const reset = () => {
+    state.self=shuffle(Array.from({length:13},(_,i)=>i+1));
+    state.mountain=shuffle(Array.from({length:13},(_,i)=>i+1));
+    state.hand=state.self.splice(0,3);
+    state.turn=0;state.score=0;state.streak=0;state.bestStreak=0;
+    state.successes=0;state.selected=null;state.exchangeUsed=false;
+    state.history=[];state.started=true;state.finished=false;
+    $("startPanel").hidden=true;$("resultPanel").hidden=true;
+    $("gamePanel").hidden=false;$("handPanel").hidden=false;$("historyPanel").hidden=false;
+    render();setStatus("手札からカードを1枚選んでください。");
+  };
+  const setStatus=(msg,type="")=>{$("status").textContent=msg;$("status").className="status"+(type?" "+type:"");};
+  const addHistory=(html)=>{const list=$("historyList");if(list.querySelector(".history-empty"))list.innerHTML="";list.insertAdjacentHTML("afterbegin",html);};
+  const render=()=>{
+    $("turnStat").textContent=(state.finished?13:state.turn+1)+" / 13";
+    $("scoreStat").textContent=state.score;
+    $("streakStat").textContent=state.streak;
+    $("targetRank").textContent=rank(state.mountain[state.turn]);
+    $("nextRank").textContent=state.turn<12?rank(state.mountain[state.turn+1]):"—";
+    $("handCount").textContent=`(${state.hand.length}枚)`;
+    $("selfRemaining").textContent=`自札の残り：${state.self.length}枚`;
+    $("exchangeState").textContent=`交換：${state.exchangeUsed?"使用済み":"未使用"}`;
+    $("handCards").innerHTML="";
+    state.hand.forEach((card,i)=>{
+      const btn=document.createElement("button");
+      btn.type="button";btn.className="hand-card"+(state.selected===i?" selected":"");
+      btn.setAttribute("aria-pressed",state.selected===i?"true":"false");
+      btn.innerHTML=`<span class="rank">${rank(card)}</span><small>${card} ${state.selected===i?"・選択中":"・タップして選択"}</small>`;
+      btn.addEventListener("click",()=>{state.selected=state.selected===i?null:i;render();});
+      $("handCards").appendChild(btn);
+    });
+    $("playBtn").disabled=state.selected===null||state.finished;
+    $("exchangeBtn").disabled=state.selected===null||state.exchangeUsed||state.finished;
+  };
+  const play=()=>{
+    if(state.selected===null||state.finished)return;
+    const card=state.hand[state.selected],target=state.mountain[state.turn];
+    const ok=card>=target;
+    state.hand.splice(state.selected,1);
+    if(state.self.length)state.hand.push(state.self.shift());
+    if(ok){state.streak++;state.successes++;const earned=state.streak+1;state.score+=earned;state.bestStreak=Math.max(state.bestStreak,state.streak);
+      addHistory(`<div class="history-item"><strong>${state.turn+1}ターン</strong><span>山札 ${rank(target)} ／ 出したカード ${rank(card)}</span><span class="pill ok">成功 +${earned}点</span></div>`);
+      state.turn++;state.selected=null;render();setStatus(`${earned}点獲得！ ${state.streak}回連続成功。`,"success");
+    }else{
+      state.streak=0;
+      addHistory(`<div class="history-item"><strong>${state.turn+1}ターン</strong><span>山札 ${rank(target)} ／ 出したカード ${rank(card)}</span><span class="pill ng">失敗 0点</span></div>`);
+      state.turn++;state.selected=null;render();setStatus("失敗。0点。連続成功回数がリセットされました。","failure");
+    }
+    if(state.turn>=13)finish();
+  };
+  const exchange=()=>{
+    if(state.selected===null||state.exchangeUsed||state.finished)return;
+    const returned=state.hand.splice(state.selected,1)[0];
+    state.self=shuffle([...state.self,returned]);
+    if(state.self.length)state.hand.push(state.self.shift());
+    state.exchangeUsed=true;state.streak=0;state.selected=null;
+    addHistory(`<div class="history-item"><strong>手札交換</strong><span>${rank(returned)}を戻して1枚引き直し</span><span class="pill exchange">交換使用</span></div>`);
+    render();setStatus("手札を交換しました。連続成功回数は0に戻りました。");
+  };
+  const finish=()=>{
+    state.finished=true;
+    $("resultPanel").hidden=false;
+    $("finalScore").textContent=state.score+"点";
+    $("successCount").textContent=state.successes+" / 13";
+    $("bestStreak").textContent=state.bestStreak+"回";
+    $("playBtn").disabled=true;$("exchangeBtn").disabled=true;
+    setStatus("全13ターン終了！お疲れさまでした。");
+  };
+  $("startBtn").addEventListener("click",reset);
+  $("againBtn").addEventListener("click",reset);
+  $("playBtn").addEventListener("click",play);
+  $("exchangeBtn").addEventListener("click",exchange);
+})();
+</script>
+</body>
+</html>
